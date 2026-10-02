@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de E-mail - FC Arena</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 { color: #38bdf8; }
+        p { color: #94a3b8; }
+        .btn {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #0284c7;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .btn:hover { background-color: #0369a1; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2 id="title">A confirmar...</h2>
+        <p id="message">Por favor, aguarde enquanto validamos o seu e-mail.</p>
+        <a id="home-btn" href="https://seu-projeto.vercel.app" class="btn" style="display: none;">Ir para a Aplicação</a>
+    </div>
+
+    <!-- Importar o cliente do Supabase via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Substitua pelas credenciais do seu projeto Supabase
+        const SUPABASE_URL = 'https://mirnheuycclmxlhtscxc.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_VIdzdPOF-riKdxoZJWL1hQ_MCYXdV8p';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function handleEmailConfirmation() {
+            const titleElem = document.getElementById('title');
+            const messageElem = document.getElementById('message');
+            const btnElem = document.getElementById('home-btn');
+
+            // O Supabase envia parâmetros na hash da URL (ex: #access_token=...&type=signup)
+            const hash = window.location.hash;
+
+            if (hash && hash.includes('access_token')) {
+                try {
+                    // O SDK do Supabase deteta e processa automaticamente a sessão através da hash
+                    const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+
+                    if (error) throw error;
+
+                    titleElem.textContent = 'E-mail Confirmado com Sucesso! 🎉';
+                    messageElem.textContent = 'A sua conta foi ativada. Já pode aceder à plataforma.';
+                    btnElem.style.display = 'inline-block';
+                } catch (error) {
+                    titleElem.textContent = 'Erro na Confirmação';
+                    messageElem.textContent = 'O link é inválido ou já expirou. Tente solicitar um novo envio.';
+                }
+            } else {
+                titleElem.textContent = 'Link Inválido';
+                messageElem.textContent = 'Nenhum token de confirmação foi detetado na URL.';
+            }
+        }
+
+        handleEmailConfirmation();
+    </script>
+</body>
+</html>
